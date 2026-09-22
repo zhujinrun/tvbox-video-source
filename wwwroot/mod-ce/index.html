@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+    <link rel="icon" href="./static/cat.jpg" type="image/x-icon" />
+    <link rel="shortcut icon" href="./static/cat.jpg" type="image/x-icon" />
+    <title>TVBox 配置编辑器</title>
+    <style type="text/css">
+        .input-group {
+            margin: 10px 0;
+        }
+    </style>
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <div class="container">
+        <h5>&nbsp;</h5>
+        <div class="input-group">
+            <span class="input-group-addon">vip</span>
+            <input type="text" class="form-control" />
+        </div>
+        <div class="input-group-add">
+            <!--
+            <div class="input-group">
+                <span class="input-group-addon">tv1</span>
+                <input class="form-control" type="text" />
+                <span class="input-group-addon">
+                    <button class="btn btn-default" type="button"> + </button>
+                </span>
+            </div>
+        -->
+            <!--
+            <div class="input-group">
+                <span class="input-group-addon">tv1</span>
+                <textarea class="form-control"></textarea>
+                <span class="input-group-addon">
+                    <button class="btn btn-default" type="button"> + </button>
+                </span>
+            </div>
+        -->
+        </div>
+        <div class="pull-right">
+            <button class="btn btn-primary" onclick="Save();">保存</button>
+            <button class="btn btn-default" onclick="javascript: window.location.reload();">取消</button>
+        </div>
+
+        <div id="more"></div>
+    </div>
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/jquery.input-group.js"></script>
+    <script>
+        var fileName = 'default';
+
+        $(function () {
+            $.getJSON("/read?file=" + fileName, function (res) {
+                // console.log(res);
+                $('.input-group-add').initInputGroup({
+                    key: 'tv',
+                    data: res,
+                    /*'widget': 'textarea',
+                    'add' : '添加',
+                    'del' : '删除'*/
+                });
+            });
+
+            GetPages();
+        });
+
+        function GetPages() {
+            $.getJSON("/page/list", function (res) {
+                // console.log(res);
+                var html = '';
+                for (var i = 0; i < res.length; i++) {
+                    html += '<p align="left"><a href="'+ res[i].page +'.html">'+ res[i].app +' 配置编辑器</a></p>';
+                }
+
+                $("#more").html(html);
+            });
+        }
+
+        function Save(key) {
+            var obj = {};
+            $('.input-group').each(function (index, element) {
+                var key = $(element).children('.input-group-addon').text();
+                var val = $(element).children('.form-control').val();
+                //console.log($(element).children('.input-group-addon').text());
+                //console.log($(element).children('.form-control').val());
+                if (val) {
+                    obj[key] = val;
+                }
+            });
+            console.log(obj);
+            $.post("/save?file=" + fileName, { config: obj }, function (res) {
+                console.log(res);
+                window.location.reload();
+            })
+        }
+    </script>
+</body>
+</html>

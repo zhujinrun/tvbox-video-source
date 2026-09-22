@@ -1,0 +1,321 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "TVBox Video Source API",
+    "version": "1.0.0",
+    "description": "TVBox 配置管理服务 API"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "健康检查",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "success"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{key}": {
+      "get": {
+        "summary": "根据 default.json 重定向",
+        "operationId": "getDefaultConfig",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "vip"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "重定向到配置的 URL"
+          }
+        }
+      }
+    },
+    "/{file}/{key}": {
+      "get": {
+        "summary": "根据 {file}.json 重定向",
+        "operationId": "getFileConfig",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xiaopingguo"
+          },
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "example": "vip"
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "重定向到配置的 URL"
+          }
+        }
+      }
+    },
+    "/read": {
+      "get": {
+        "summary": "读取 JSON 配置",
+        "operationId": "readConfig",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "default"
+            },
+            "description": "配置文件名（不含 .json）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "配置内容",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                },
+                "example": {
+                  "vip": "https://example.com/vip.json",
+                  "tv1": "https://example.com/tv1.json"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "读取或解析失败"
+          }
+        }
+      }
+    },
+    "/save": {
+      "post": {
+        "summary": "保存 JSON 配置",
+        "operationId": "saveConfig",
+        "parameters": [
+          {
+            "name": "file",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "default"
+            },
+            "description": "配置文件名（不含 .json）"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              },
+              "example": {
+                "vip": "https://example.com/vip.json",
+                "tv1": "https://example.com/tv1.json"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "保存成功"
+          },
+          "400": {
+            "description": "请求参数错误"
+          },
+          "500": {
+            "description": "保存失败"
+          }
+        }
+      }
+    },
+    "/upload": {
+      "post": {
+        "summary": "上传文件",
+        "operationId": "uploadConfig",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": ["file"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "上传成功，返回文件 URL",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                },
+                "example": "http://localhost:5000/raw/example.txt"
+              }
+            }
+          },
+          "400": {
+            "description": "缺少文件或请求错误"
+          },
+          "500": {
+            "description": "上传失败"
+          }
+        }
+      }
+    },
+    "/page/list": {
+      "get": {
+        "summary": "页面列表",
+        "operationId": "listPages",
+        "responses": {
+          "200": {
+            "description": "页面列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Page"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "读取失败"
+          }
+        }
+      }
+    },
+    "/page/create": {
+      "post": {
+        "summary": "创建/更新页面",
+        "operationId": "createPage",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Page"
+              },
+              "example": {
+                "app": "MyBox",
+                "page": "mybox",
+                "file": "mybox"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功"
+          },
+          "400": {
+            "description": "请求体解析失败"
+          },
+          "500": {
+            "description": "保存失败"
+          }
+        }
+      }
+    },
+    "/page/delete": {
+      "delete": {
+        "summary": "删除页面",
+        "operationId": "deletePage",
+        "parameters": [
+          {
+            "name": "app",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "应用名称（内置页面 TVBox/AppleBox/CatBox 不可删除）"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "删除成功"
+          },
+          "400": {
+            "description": "参数错误或禁止删除"
+          },
+          "500": {
+            "description": "保存失败"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Page": {
+        "type": "object",
+        "properties": {
+          "app": {
+            "type": "string",
+            "example": "TVBox"
+          },
+          "page": {
+            "type": "string",
+            "example": "index"
+          },
+          "file": {
+            "type": "string",
+            "example": "default"
+          }
+        },
+        "required": ["app", "page", "file"]
+      }
+    }
+  }
+}
