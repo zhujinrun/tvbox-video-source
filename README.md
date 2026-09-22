@@ -26,6 +26,14 @@ go build -ldflags="-s -w" -o release/tvbox-video-source.exe && upx.exe -9 releas
 GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -ldflags="-s -w" -o release/tvbox-video-source && upx.exe -9 release/tvbox-video-source
 ```
 
+Powershell:
+
+```bash
+$env:GOOS="linux"; $env:GOARCH="amd64"; $env:CGO_ENABLED="0"
+go build -ldflags="-s -w" -o release/tvbox-video-source .
+upx.exe -9 release/tvbox-video-source
+```
+
 ## 运行
 
 ```bash
